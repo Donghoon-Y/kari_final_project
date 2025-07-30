@@ -7,7 +7,7 @@
 void split_source_packet(const char* input_file, const char* filename);
 void make_transport_file(const char* spfilename, const char* tpfilename);
 void tptojpeg(const char* tpfilename, const char* jpegfilename, unsigned long long key);
-void tptoGIF(const char* tpfilename, const char* giffilename);
+void tptoGIF(const char* tpfilename, const char* giffilename, unsigned long long key);
 
 int main(void)
 {
@@ -83,7 +83,8 @@ int main(void)
 
     tptoGIF(
         "C:\\kari_final_project\\final_project\\transport\\add\\add_tp",
-        "C:\\kari_final_project\\final_project\\LRIT\\add\\add_"
+        "C:\\kari_final_project\\final_project\\LRIT\\add\\add_",
+        0x3B0779919DC237A4
     );
     return 0;
 }
@@ -182,6 +183,7 @@ void tptojpeg(const char* tpfilename, const char* jpegfilename, unsigned long lo
 {
     int size = 0;
     int j = 0;
+    
     unsigned char data[140000];
     char fname1[256];
     char fname2[256];
@@ -193,28 +195,73 @@ void tptojpeg(const char* tpfilename, const char* jpegfilename, unsigned long lo
         sprintf(fname1, "%s_%d.dat", tpfilename, j);
         fpTP = fopen(fname1, "rb");
         if (!fpTP) break;
-
         size = fread(data, 1, sizeof(data), fpTP);
         fclose(fpTP);
 
-        int offset = 3910;
+        int offset = 10;
+        unsigned short primary_header_record_length = (data[11] << 8) | data[12];
+        offset += primary_header_record_length;
+        
+        unsigned short type1_header_record_length = (data[offset+1]<<8) | data[offset+2] ;
+        offset += type1_header_record_length;
+
+        unsigned short type2_header_record_length = (data[offset + 1] << 8) | data[offset + 2];
+        offset += type2_header_record_length;
+
+        unsigned short type3_header_record_length = (data[offset + 1] << 8) | data[offset + 2];
+        offset += type3_header_record_length;
+
+        unsigned short type4_header_record_length = (data[offset + 1] << 8) | data[offset + 2];
+        offset += type4_header_record_length;
+
+        unsigned short type5_header_record_length = (data[offset + 1] << 8) | data[offset + 2];
+        offset += type5_header_record_length;
+
+        unsigned short type7_header_record_length = (data[offset + 1] << 8) | data[offset+ 2];
+        int key_number_offset = offset + 3;
+        unsigned short key_number =
+            (data[key_number_offset + 0] << 24) |
+            (data[key_number_offset + 1] << 16) |
+            (data[key_number_offset + 2] << 8) |
+            (data[key_number_offset + 3]);
+        printf("IMG DATA KEY HEADER ÀÎµ¦½º(key_number): %x\n", key_number);
+        offset += type7_header_record_length;
+        
+
+        
+
+        unsigned short type128_header_record_length = (data[offset + 1] << 8) | data[offset + 2];
+        offset += type128_header_record_length;
+
         if (size <= offset) break;
+        if (key_number != 0)
+        {
+            DES des;
+            des.setKey(key);
+            des.decrypt(data + offset, size - offset);
 
-        DES des;
-        des.setKey(key);
-        des.decrypt(data + offset, size - offset);
+            sprintf(fname2, "%s%d.jpeg", jpegfilename, j);
+            fpLRIT = fopen(fname2, "wb");
+            fwrite(data + offset, 1, size - offset, fpLRIT);
+            fclose(fpLRIT);
 
-        sprintf(fname2, "%s%d.jpeg", jpegfilename, j);
-        fpLRIT = fopen(fname2, "wb");
-        fwrite(data + offset, 1, size - offset, fpLRIT);
-        fclose(fpLRIT);
+            j++;
+        }
 
-        j++;
+        else if (key_number == 0)
+        {
+            sprintf(fname2, "%s%d.jpeg", jpegfilename, j);
+            fpLRIT = fopen(fname2, "wb");
+            fwrite(data + offset, 1, size - offset, fpLRIT);
+            fclose(fpLRIT);
+
+            j++;
+        }
     }
 }
 
 
-void tptoGIF(const char* tpfilename, const char* giffilename)
+void tptoGIF(const char* tpfilename, const char* giffilename, unsigned long long key)
 {
     unsigned char data[140000];
     size_t size;
@@ -231,14 +278,49 @@ void tptoGIF(const char* tpfilename, const char* giffilename)
 
         size = fread(data, 1, sizeof(data), fpTP);
         fclose(fpTP);
+        int offset = 10;
+        unsigned short primary_header_record_length = (data[11] << 8) | data[12];
+        offset += primary_header_record_length;
+
+        unsigned short type4_header_record_length = (data[offset + 1] << 8) | data[offset + 2];
+        offset += type4_header_record_length;
+
+        unsigned short type5_header_record_length = (data[offset + 1] << 8) | data[offset + 2];
+        offset += type5_header_record_length;
+
+        unsigned short type7_header_record_length = (data[offset + 1] << 8) | data[offset + 2];
+        int key_number_offset = offset + 3;
+        unsigned int key_number =
+            (data[key_number_offset + 0] << 24) |
+            (data[key_number_offset + 1] << 16) |
+            (data[key_number_offset + 2] << 8) |
+            (data[key_number_offset + 3]);
+        printf("ADD DATA KEY HEADER ÀÎµ¦½º(key_number): %x\n", key_number);
+        offset += type7_header_record_length;
 
         if (size <= offset) break;
+        if (key_number != 0)
+        {
+            DES des;
+            des.setKey(key);
+            des.decrypt(data + offset, size - offset);
 
-        sprintf(fname2, "%s%d.GIF", giffilename, j);
-        FILE* fpLRIT = fopen(fname2, "wb");
-        fwrite(data + offset, 1, size - offset, fpLRIT);
-        fclose(fpLRIT);
+            sprintf(fname2, "%s%d.GIF", giffilename, j);
+            FILE* fpLRIT = fopen(fname2, "wb");
+            fwrite(data + offset, 1, size - offset, fpLRIT);
+            fclose(fpLRIT);
 
-        j++;
+            j++;
+        }
+
+        else if (key_number == 0)
+        {
+            sprintf(fname2, "%s%d.GIF", giffilename, j);
+            FILE* fpLRIT = fopen(fname2, "wb");
+            fwrite(data + offset, 1, size - offset, fpLRIT);
+            fclose(fpLRIT);
+
+            j++;
+        }
     }
 }
