@@ -1,4 +1,4 @@
 ﻿  main.cpp
 C:\kari_final_project\final_project\main.cpp(198,21): warning C4267: '=': 'size_t'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-C:\kari_final_project\final_project\main.cpp(306,45): warning C4267: '인수': 'size_t'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\kari_final_project\final_project\main.cpp(303,45): warning C4267: '인수': 'size_t'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
   final_project.vcxproj -> C:\kari_final_project\final_project\x64\Debug\final_project.exe

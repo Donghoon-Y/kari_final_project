@@ -226,10 +226,7 @@ void tptojpeg(const char* tpfilename, const char* jpegfilename, unsigned long lo
             (data[key_number_offset + 3]);
         printf("IMG DATA KEY HEADER ¿Œµ¶Ω∫(key_number): %x\n", key_number);
         offset += type7_header_record_length;
-        
-
-        
-
+   
         unsigned short type128_header_record_length = (data[offset + 1] << 8) | data[offset + 2];
         offset += type128_header_record_length;
 
