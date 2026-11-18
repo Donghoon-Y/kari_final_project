@@ -22,10 +22,10 @@ int main(void)
     int error;
     int total_error = 0;
 
-    fpCADU = fopen("C:\\kari_final_project\\final_project\\LRIT_CADU.dat", "rb");
-    fpPN = fopen("C:\\kari_final_project\\final_project\\pnCode1020.dat", "rb");
-    fpIMG = fopen("C:\\kari_final_project\\final_project\\LRIT_CADU_IMG.dat", "wb");
-    fpADD = fopen("C:\\kari_final_project\\final_project\\LRIT_CADU_ADD.dat", "wb");
+    fpCADU = fopen("/Users/hoony/kari_final_project/final_project/LRIT_CADU.dat", "rb");
+    fpPN = fopen("/Users/hoony/kari_final_project/final_project/pnCode1020.dat", "rb");
+    fpIMG = fopen("/Users/hoony/kari_final_project/final_project/LRIT_CADU_IMG.dat", "wb");
+    fpADD = fopen("/Users/hoony/kari_final_project/final_project/LRIT_CADU_ADD.dat", "wb");
     fread(pn, 1, 1020, fpPN);
 
     while (fread(data, 1, 1024, fpCADU))
@@ -51,39 +51,39 @@ int main(void)
     fclose(fpIMG);
     fclose(fpADD);
 
-    printf("¿¡·¯ °³¼ö: %d\n", total_error);
+    printf("Total RS corrected errors: %d\n", total_error);
 
     //img file process
     split_source_packet(
-        "C:\\kari_final_project\\final_project\\LRIT_CADU_IMG.dat",
-        "C:\\kari_final_project\\final_project\\packet\\img\\img_sp"
+        "/Users/hoony/kari_final_project/final_project/LRIT_CADU_IMG.dat",
+        "/Users/hoony/kari_final_project/final_project/packet/img/img_sp"
     );
 
     make_transport_file(
-        "C:\\kari_final_project\\final_project\\packet\\img\\img_sp",
-        "C:\\kari_final_project\\final_project\\transport\\img\\img_tp"
+        "/Users/hoony/kari_final_project/final_project/packet/img/img_sp",
+        "/Users/hoony/kari_final_project/final_project/transport/img/img_tp"
     );
 
     tptojpeg(
-        "C:\\kari_final_project\\final_project\\transport\\img\\img_tp",
-        "C:\\kari_final_project\\final_project\\LRIT\\img\\LRIT_",
+        "/Users/hoony/kari_final_project/final_project/transport/img/img_tp",
+        "/Users/hoony/kari_final_project/final_project/LRIT/img/LRIT_",
         0x3B0779919DC237A4
         );
 
     //add file process
     split_source_packet(
-        "C:\\kari_final_project\\final_project\\LRIT_CADU_ADD.dat",
-        "C:\\kari_final_project\\final_project\\packet\\add\\add_sp"
+        "/Users/hoony/kari_final_project/final_project/LRIT_CADU_ADD.dat",
+        "/Users/hoony/kari_final_project/final_project/packet/add/add_sp"
     );
 
     make_transport_file(
-        "C:\\kari_final_project\\final_project\\packet\\add\\add_sp",
-        "C:\\kari_final_project\\final_project\\transport\\add\\add_tp"
+        "/Users/hoony/kari_final_project/final_project/packet/add/add_sp",
+        "/Users/hoony/kari_final_project/final_project/transport/add/add_tp"
     );
 
     tptoGIF(
-        "C:\\kari_final_project\\final_project\\transport\\add\\add_tp",
-        "C:\\kari_final_project\\final_project\\LRIT\\add\\add_",
+        "/Users/hoony/kari_final_project/final_project/transport/add/add_tp",
+        "/Users/hoony/kari_final_project/final_project/LRIT/add/add_",
         0x3B0779919DC237A4
     );
     return 0;
@@ -183,7 +183,7 @@ void tptojpeg(const char* tpfilename, const char* jpegfilename, unsigned long lo
 {
     int size = 0;
     int j = 0;
-    
+
     unsigned char data[140000];
     char fname1[256];
     char fname2[256];
@@ -201,7 +201,7 @@ void tptojpeg(const char* tpfilename, const char* jpegfilename, unsigned long lo
         int offset = 10;
         unsigned short primary_header_record_length = (data[11] << 8) | data[12];
         offset += primary_header_record_length;
-        
+
         unsigned short type1_header_record_length = (data[offset+1]<<8) | data[offset+2] ;
         offset += type1_header_record_length;
 
@@ -224,9 +224,9 @@ void tptojpeg(const char* tpfilename, const char* jpegfilename, unsigned long lo
             (data[key_number_offset + 1] << 16) |
             (data[key_number_offset + 2] << 8) |
             (data[key_number_offset + 3]);
-        printf("IMG DATA KEY HEADER ÀÎµ¦½º(key_number): %x\n", key_number);
+        printf("IMG DATA KEY HEADER Key number(key_number): %x\n", key_number);
         offset += type7_header_record_length;
-   
+
         unsigned short type128_header_record_length = (data[offset + 1] << 8) | data[offset + 2];
         offset += type128_header_record_length;
 
@@ -292,7 +292,7 @@ void tptoGIF(const char* tpfilename, const char* giffilename, unsigned long long
             (data[key_number_offset + 1] << 16) |
             (data[key_number_offset + 2] << 8) |
             (data[key_number_offset + 3]);
-        printf("ADD DATA KEY HEADER ÀÎµ¦½º(key_number): %x\n", key_number);
+        printf("ADD DATA KEY HEADER Key number(key_number): %x\n", key_number);
         offset += type7_header_record_length;
 
         if (size <= offset) break;
